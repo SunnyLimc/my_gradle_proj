@@ -1,3 +1,7 @@
+- name: DIKTAT_COMMON
+  configuration:
+    domainName: me.limc.demo
+    kotlinVersion: 1.7
 - name: WRONG_INDENTATION
   configuration:
     indentationSize: 2

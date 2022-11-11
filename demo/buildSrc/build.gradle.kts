@@ -1,5 +1,5 @@
 plugins{
-   `kotlin-dsl`
+  `kotlin-dsl`
 }
 
 group = "me.limc.demo"
@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
   implementation("com.diffplug.spotless:spotless-plugin-gradle:latest.release")
+  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.21")
 //  implementation("org.springframework.boot:spring-boot-gradle-plugin:2.7.5")
 //  implementation("io.spring.gradle:dependency-management-plugin:1.1.0")
   implementation(kotlin("gradle-plugin"))

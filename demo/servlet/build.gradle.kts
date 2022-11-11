@@ -10,10 +10,10 @@ repositories {
     mavenCentral()
 }
 
-dependencies{
+dependencies {
     implementation("jakarta.servlet:jakarta.servlet-api:latest.release")
 }
 
-application {
-    mainClass.set("me.limc.demo.servlet.HelloWorld")
-}
+//application {
+//    mainClass.set("me.limc.demo.servlet.Entry")
+//}

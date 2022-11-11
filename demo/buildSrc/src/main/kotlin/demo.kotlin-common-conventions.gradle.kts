@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-  id("com.diffplug.spotless")
   id("org.jetbrains.kotlin.jvm")
+  java
+  id("com.diffplug.spotless")
 //  id("org.springframework.boot")
 //  id("io.spring.dependency-management")
 }
@@ -24,6 +27,23 @@ spotless {
   kotlin {
 //    ktlint().editorConfigOverride(mapOf("indent_size" to 2))
     diktat().configFile("/home/limc/Coding/Java/me.limc/demo/buildSrc/src/main/resources/diktat-analysis.yml")
+  }
+  java {
+    indentWithSpaces(2)
+    removeUnusedImports()
+    formatAnnotations()
+    googleJavaFormat().aosp().reflowLongStrings()
+  }
+}
+
+tasks.withType<JavaCompile>{
+  sourceCompatibility = "17"
+  targetCompatibility = "17"
+}
+
+tasks.withType<KotlinCompile>{
+  kotlinOptions {
+    jvmTarget = "17"
   }
 }
 
