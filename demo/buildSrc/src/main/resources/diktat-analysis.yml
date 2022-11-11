@@ -1,0 +1,3 @@
+- name: WRONG_INDENTATION
+  configuration:
+    indentationSize: 2

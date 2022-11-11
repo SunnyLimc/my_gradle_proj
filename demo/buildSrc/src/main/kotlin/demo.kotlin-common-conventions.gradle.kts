@@ -23,7 +23,7 @@ dependencies {
 spotless {
   kotlin {
 //    ktlint().editorConfigOverride(mapOf("indent_size" to 2))
-    diktat()
+    diktat().configFile("/home/limc/Coding/Java/me.limc/demo/buildSrc/src/main/resources/diktat-analysis.yml")
   }
 }
 

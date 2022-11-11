@@ -15,5 +15,5 @@ dependencies{
 }
 
 application {
-    mainClass.set("me.limc.demo.servlet.EntryKt")
+    mainClass.set("me.limc.demo.servlet.HelloWorld")
 }
