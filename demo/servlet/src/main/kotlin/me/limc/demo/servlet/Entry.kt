@@ -12,8 +12,6 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.apache.logging.log4j.core.lookup.EnvironmentLookup
 
-var logger: Logger = LogManager.getRootLogger()
-
 /**
  * 268/273 - Entry
  *
@@ -21,6 +19,9 @@ var logger: Logger = LogManager.getRootLogger()
  */
 @WebServlet(name = "HelloWorld", urlPatterns = ["/hello"])
 class Entry : HttpServlet() {
+  /** Logger */
+  private val logger: Logger = LogManager.getLogger(this::class.simpleName)
+
   /** Env */
   lateinit var env: EnvironmentLookup
 
@@ -67,6 +68,9 @@ class Entry : HttpServlet() {
  */
 @WebServlet(urlPatterns = ["/add"])
 class AddWorkServlet : HttpServlet() {
+  /** Logger */
+  private val logger: Logger = LogManager.getLogger(this::class.simpleName)
+
   /**
    * Do get
    *
@@ -158,6 +162,9 @@ object PrimeServiceImpl : PrimeService {
  */
 @WebServlet(urlPatterns = ["/prime"])
 class PrimeWorkServlet : HttpServlet() {
+  /** Logger */
+  private val logger: Logger = LogManager.getLogger(this::class.qualifiedName)
+
   /**
    * Do get
    *
@@ -193,3 +200,14 @@ class PrimeWorkServlet : HttpServlet() {
     resp.writer.close()
   }
 }
+
+/**
+ * Car
+ *
+ * @property brand
+ * @property price
+ */
+data class Car(
+  var brand: String = "null",
+  var price: Int = 0
+)

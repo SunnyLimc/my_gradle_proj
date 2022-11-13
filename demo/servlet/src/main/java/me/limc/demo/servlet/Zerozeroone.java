@@ -7,15 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/send"})
-public class Op extends HttpServlet {
-    public Op() {
-        super();
-    }
+@WebServlet(urlPatterns = "/110")
+public class Zerozeroone extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        resp.getWriter().println("HelloWorld");
+        String name = (String) req.getAttribute("name");
+        resp.getWriter().println("黍属表示不管并白嫖了你一餐饭，当然，吃得不是" + name);
     }
 }
