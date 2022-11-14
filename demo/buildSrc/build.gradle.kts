@@ -6,8 +6,8 @@ group = "me.limc.demo"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    gradlePluginPortal()
-    mavenCentral()
+  gradlePluginPortal()
+  mavenCentral()
 }
 
 dependencies {

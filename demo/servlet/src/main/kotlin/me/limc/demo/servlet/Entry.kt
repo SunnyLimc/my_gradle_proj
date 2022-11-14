@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpServletResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.apache.logging.log4j.core.lookup.EnvironmentLookup
+import java.awt.PageAttributes.MediaType.NOTE
+import java.sql.Connection
+import java.sql.DriverManager
 
 /**
  * 268/273 - Entry
@@ -66,7 +69,7 @@ class Entry : HttpServlet() {
  *
  * @constructor Create empty Prime work servlet
  */
-@WebServlet(urlPatterns = ["/add"])
+@WebServlet(urlPatterns = ["/legacyadd"])
 class AddWorkServlet : HttpServlet() {
   /** Logger */
   private val logger: Logger = LogManager.getLogger(this::class.simpleName)
@@ -196,6 +199,7 @@ class PrimeWorkServlet : HttpServlet() {
     }
     str.append("</body></html>")
     resp.writer.println(str)
+    resp.writer.println(str)
     resp.writer.flush()
     resp.writer.close()
   }
@@ -211,3 +215,67 @@ data class Car(
   var brand: String = "null",
   var price: Int = 0
 )
+
+/**
+ * 298
+ *
+ * DB utils
+ *
+ * @constructor Create empty D b utils
+ */
+object Dbutils {
+  /** Conn Url */
+  private const val CONN_URL: String = "jdbc:mariadb://localhost:3306/limc"
+  private const val USER: String = "limc"
+  private const val PW: String = "limc123456"
+
+  /**
+   * Get conn
+   *
+   * @return db conn
+   */
+  fun getConn(): Connection {
+    val conn: Connection = DriverManager.getConnection(CONN_URL, USER, PW)
+    NOTE
+    return conn
+  }
+}
+
+/**
+ * Studb
+ *
+ * @constructor Create empty Studb
+ */
+@WebServlet(urlPatterns = ["/studb"])
+class StuDb : HttpServlet() {
+  /**
+   * Do get
+   *
+   * @param req
+   * @param resp
+   */
+  override fun doGet(req: HttpServletRequest?, resp: HttpServletResponse?) {
+    addStu()
+  }
+
+  /** Add stu */
+  fun addStu() {
+    val conn = Dbutils.getConn()
+    val tmt = conn.prepareStatement(SQL_ADD)
+    val stus = StudentServiceImpl.defaultRandomStu(RDM_CNT)
+    for (i in stus) {
+      tmt.setInt(1, i.stuNo)
+      tmt.setString(2, i.stuName)
+      tmt.setInt(3, i.stuAge)
+      tmt.setDouble(4, i.stuAge.toDouble())
+    }
+    tmt.executeUpdate()
+    conn.close()
+  }
+
+  companion object {
+    /** Sql Add */
+    private const val SQL_ADD: String = "insert into tbl_student values(?,?,?,?)"
+    private const val RDM_CNT = 3
+  }
+}

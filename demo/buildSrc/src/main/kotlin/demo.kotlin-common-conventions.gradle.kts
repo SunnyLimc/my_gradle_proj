@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("org.jetbrains.kotlin.jvm")
-  java
   id("com.diffplug.spotless")
 //  id("org.springframework.boot")
 //  id("io.spring.dependency-management")
@@ -25,11 +24,9 @@ dependencies {
 
 spotless {
   kotlin {
-//    ktlint().editorConfigOverride(mapOf("indent_size" to 2))
-    diktat().configFile("/home/limc/Coding/Java/me.limc/demo/buildSrc/src/main/resources/diktat-analysis.yml")
+//    diktat().configFile("/home/limc/Coding/Java/me.limc/demo/buildSrc/src/main/resources/diktat-analysis.yml")
   }
   java {
-    indentWithSpaces(2)
     removeUnusedImports()
     formatAnnotations()
     googleJavaFormat().aosp().reflowLongStrings()
