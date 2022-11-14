@@ -2,6 +2,9 @@
 
 package me.limc.demo.servlet
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import jakarta.servlet.ServletContext
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.annotation.WebServlet
@@ -11,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.apache.logging.log4j.core.lookup.EnvironmentLookup
-import java.awt.PageAttributes.MediaType.NOTE
+import java.io.IOException
 import java.sql.Connection
 import java.sql.DriverManager
 
@@ -53,7 +56,7 @@ class Entry : HttpServlet() {
    * @param resp
    */
   override fun doGet(req: HttpServletRequest?, resp: HttpServletResponse?) {
-    resp!!.writer.println("hello world!!")
+    resp!!.writer.println("hello world!!!")
     logger.info("doGet() called: ${this::class.simpleName}")
   }
 
@@ -210,34 +213,180 @@ class PrimeWorkServlet : HttpServlet() {
  *
  * @property brand
  * @property price
+ * @property no
+ * @property weight
  */
 data class Car(
   var brand: String = "null",
-  var price: Int = 0
+  var price: Int = 0,
+  var no: String = "null",
+  var weight: Double = 0.0
 )
 
 /**
- * 298
+ * Car service
+ *
+ * @constructor Create empty Car service
+ *
+ * 299
+ */
+object CarService {
+  /**
+   * Log
+   */
+  private val log = LogManager.getLogger(this::class.simpleName)
+
+  /**
+   * Sql Query All
+   */
+  private val sqlQueryAll: String = "SELECT * FROM tbl_car"
+
+  /**
+   * Sql query id
+   */
+  private val sqlQueryId: String = "SELECT * FROM tbl_car WHERE car_no = ?"
+
+  /**
+   * Load cars
+   *
+   * @return an array of cars
+   */
+  fun loadCars(): ArrayList<Car> {
+    val conn = Dbutils().getConn()
+    val rset = conn.use { conn ->
+      conn!!.prepareStatement(sqlQueryAll).executeQuery()
+    }
+    var cars: ArrayList<Car> = arrayListOf()
+    try {
+      while (rset.next()) {
+        var car = Car().apply {
+          brand = rset.getString("car_brand")
+          price = rset.getInt("car_price")
+          no = rset.getString("car_no")
+          weight = rset.getDouble("car_weight")
+        }
+        cars.add(car)
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      log.error("Can't retrieve val from DBRSet")
+    }
+    conn!!.close()
+    return cars
+  }
+
+  /**
+   * Load cars id
+   *
+   * @param id id to query
+   * @return an array of cars
+   */
+  fun loadCarId(id: String): Car? {
+    val conn = Dbutils().getConn()
+    val rset = conn.use { conn ->
+      val stmt = conn!!.prepareStatement(sqlQueryId)
+      stmt.setString(1, id)
+      stmt.executeQuery()
+    }
+    val car: Car? = try {
+      if (rset.next()) {
+        Car().apply {
+          brand = rset.getString("car_brand")
+          price = rset.getInt("car_price")
+          no = rset.getString("car_no")
+          weight = rset.getDouble("car_weight")
+        }
+      } else {
+        Car()
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      log.error("Can't retrieve val from DBRSet")
+      null
+    }
+    conn!!.close()
+    return car
+  }
+}
+
+/**
+ * 298 / 299
  *
  * DB utils
  *
- * @constructor Create empty D b utils
+ * @constructor Create empty Db utils
  */
-object Dbutils {
-  /** Conn Url */
-  private const val CONN_URL: String = "jdbc:mariadb://localhost:3306/limc"
-  private const val USER: String = "limc"
-  private const val PW: String = "limc123456"
+class Dbutils {
+  /**
+   * Init
+   *
+   * @throws Exception pool can not init
+   */
+  private val conn: HikariDataSource? = try {
+    Class.forName("org.mariadb.jdbc.Driver")
+    val hc = HikariConfig().apply {
+      jdbcUrl = "$CONN_URL?user=$USER&password=$PW"
+    }
+    hc.addDataSourceProperty("cachePrepStmts", true)
+    HikariDataSource(hc)
+  } catch (e: IOException) {
+    log.error(e.printStackTrace().toString())
+    throw Exception("The data source pool can not be initialized.")
+  }
 
   /**
    * Get conn
    *
    * @return db conn
    */
-  fun getConn(): Connection {
-    val conn: Connection = DriverManager.getConnection(CONN_URL, USER, PW)
-    NOTE
-    return conn
+  fun legacyGetConn(): Connection {
+    Class.forName("org.mariadb.jdbc.Driver")
+    return DriverManager.getConnection(CONN_URL, USER, PW)
+  }
+
+  /**
+   * Get conn
+   *
+   * @return conn
+   * @throws Exception can not init conn
+   */
+  fun getConn(): Connection? {
+    conn ?: run {
+      log.debug("The data source can not be initialized.")
+      throw Exception("The data source can not be initialized.")
+    }
+    return try {
+      conn.getConnection()
+    } catch (e: Exception) {
+      log.error(e.printStackTrace())
+      throw e
+      null
+    }
+  }
+
+  companion object {
+    /**
+     * Log
+     */
+    private val log = LogManager.getLogger(this::class.simpleName)
+
+    /** Conn Url */
+    private const val CONN_URL = "jdbc:mariadb://localhost:3306/limc"
+
+    /**
+     * User
+     */
+    private const val USER = "java"
+
+    /**
+     * Pw
+     */
+    private const val PW = "thisisajavatestuser"
+
+    /**
+     * Context
+     */
+    private var context: ServletContext? = null
   }
 }
 
@@ -260,16 +409,16 @@ class StuDb : HttpServlet() {
 
   /** Add stu */
   fun addStu() {
-    val conn = Dbutils.getConn()
-    val tmt = conn.prepareStatement(SQL_ADD)
+    val conn = Dbutils().legacyGetConn()
     val stus = StudentServiceImpl.defaultRandomStu(RDM_CNT)
     for (i in stus) {
+      val tmt = conn.prepareStatement(SQL_ADD)
       tmt.setInt(1, i.stuNo)
       tmt.setString(2, i.stuName)
       tmt.setInt(3, i.stuAge)
       tmt.setDouble(4, i.stuAge.toDouble())
+      tmt.executeUpdate()
     }
-    tmt.executeUpdate()
     conn.close()
   }
 
@@ -277,5 +426,48 @@ class StuDb : HttpServlet() {
     /** Sql Add */
     private const val SQL_ADD: String = "insert into tbl_student values(?,?,?,?)"
     private const val RDM_CNT = 3
+  }
+}
+
+
+/**
+ * Last edit d b
+ *
+ * @constructor Create empty Last edit d b
+ */
+@WebServlet(urlPatterns = ["/editdb"])
+class lastEditDB : HttpServlet() {
+  //! DO NOT USE THIS SQL IN PRODUCTION ENVIRONMENT
+
+  /**
+   * S update
+   */
+  private val sUpdate = "update tbl_car set car_weight=?, car_price=?, car_brand=? where car_no=?"
+
+  /**
+   * Do get
+   *
+   * @param req
+   * @param resp
+   */
+  override fun doGet(req: HttpServletRequest?, resp: HttpServletResponse?) {
+    var price = req!!.getParameter("price")
+    price = if (price.isEmpty() || price == null) "car_price" else price
+    var brand = req!!.getParameter("brand")
+    brand = if (brand.isEmpty() || brand == null) "car_brand" else brand
+    var weight = req!!.getParameter("weight")
+    weight = if (weight.isEmpty() || weight == null) "car_weight" else weight
+    var queryno = req!!.getParameter("queryno")
+    queryno = if (queryno.isEmpty() || queryno == null) "car_no" else queryno
+    val conn = Dbutils().getConn()
+    conn.use { conn ->
+      val stmt = conn!!.prepareStatement(sUpdate)
+      stmt.setString(1, weight)
+      stmt.setString(2, price)
+      stmt.setString(3, brand)
+      stmt.setString(4, queryno)
+      stmt.execute()
+    }
+    conn!!.close()
   }
 }

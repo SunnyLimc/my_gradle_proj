@@ -102,7 +102,7 @@ object StudentServiceImpl : StudentService {
    * @return use default strategy for random
    */
   override fun defaultRandomStu(count: Int): Array<Student> = randomStu(
-    COUNT.toUInt(),
+    count.toUInt(),
     { (0..RAND_ID_MAX).random() },
     { (1..RAND_STR_LEN).map { (('0'..'9') + ('a'..'z') + ('A'..'Z')).random() }.joinToString("") },
     { (RAND_GRADE_MIN..RAND_GRADE_MAX).random() }

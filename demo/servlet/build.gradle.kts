@@ -17,17 +17,20 @@ dependencies {
     implementation("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:latest.release")
     implementation("org.glassfish.web:jakarta.servlet.jsp.jstl:latest.release")
     implementation("org.mariadb.jdbc:mariadb-java-client:latest.release")
+    implementation("com.zaxxer:HikariCP:5.0.1")
 }
 
 //application {
 //    mainClass.set("me.limc.demo.servlet.Entry")
 //}
 
-tasks.register<Copy>("MariadbJdbcDriver") {
-    println(tasks.named("war").get().classpath)
-}
 
-tasks.withType<War> {
-    dependsOn(tasks.withType<Copy>())
-}
-
+// Don't be misleading by following, just example, don't use it unless you know what you are doing
+//tasks.war {
+//
+//    println("Coping jdbc driver to \$CATALINA_BASE/lib")
+//    from(tasks.war.get().classpath) {
+//        into("lib")
+//        include("mariadb-java-client*.jar")
+//    }
+//}
